@@ -1,0 +1,34 @@
+﻿@page "/login"
+@using BC.Shared
+@inject LogInVM _vm
+@inject NavigationManager _navigation
+
+<h3>Log In</h3>
+
+@if (_vm.UIMessage != null)
+{
+    <div class="alert alert-warning" role="alert">
+        @_vm.UIMessage
+    </div>
+}
+<form>
+    <div class="form-group">
+        <label for="exampleInputEmail1">Email address</label>
+        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" @bind-value="_vm.Email">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Password</label>
+        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" @bind-value="_vm.Password">
+    </div>
+    <input type="button" @onclick="LogInButtonClick" class="btn btn-primary" value="Log In" />
+</form>
+
+@code {
+
+    private async void LogInButtonClick()
+    {
+        if (await _vm.SignInUserAsync())
+            _navigation.NavigateTo("/", true);
+    }
+}

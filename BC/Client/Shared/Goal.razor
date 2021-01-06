@@ -1,0 +1,30 @@
+﻿@using BC.Shared
+
+<a href="#" class="list-group-item list-group-item-action @( Source.IsCompleted ? "list-group-item-success" : "list-group-item-secondary")">
+    <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">
+            <i class="fa @(Source.IsCompleted ? "fa-check-circle text-success": "fa-arrow-circle-right text-secondary")" />
+            @Source.Name
+        </h5>
+        <small class="text-muted">
+            Difficulty: @Source.Difficulty points
+        </small>
+            <small class="text-muted">
+                Deadline: @Source.ExpectedDeadline
+                @if (Source.IsCompleted)
+                {
+                    <span></span>
+                    <span>Completed on: @Source.DateCompleted.ToString()</span>
+                }
+            </small>
+    </div>
+    @if(Source.Children != null && Source.Children.Count > 0)
+    {
+        <GoalsView Items="Source.Children" />
+    }
+</a>
+
+@code {
+    [Parameter]
+    public GoalInfo Source { get; set; }
+}

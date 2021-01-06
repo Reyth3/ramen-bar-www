@@ -1,0 +1,86 @@
+﻿@page "/"
+
+@using BC.Shared
+@using ChartJs.Blazor.PieChart
+@using ChartJs.Blazor.Common
+@using ChartJs.Blazor.Util
+@using BC.Client.Shared
+@inject GoalsDashboardVM _vm
+
+<AuthorizeView>
+    <Authorized>
+        <div class="container-fluid">
+            <h1>My Goals!</h1>
+            <div class="row">
+                <div class="col-md-8">
+
+                    @if (_vm.Goals == null)
+                    {
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    }
+                    else
+                    {
+
+                        <ul>
+                            <GoalsView Items="_vm.Goals" />
+                        </ul>
+                    }
+                </div>
+                <div class="col-md-4">
+                    <Chart Config="_config"></Chart>
+                </div>
+            </div>
+        </div>
+
+    </Authorized>
+    <NotAuthorized>
+        <h2>Not authorized.</h2>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code { 
+
+    private PieConfig _config;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        _config = new PieConfig(true)
+        {
+            Options = new PieOptions()
+            {
+                Responsive = true,
+                Title = new ChartJs.Blazor.Common.OptionsTitle()
+                {
+                    Display = true,
+                    Text = "Goal Completion",
+                },
+            },
+        };
+        await base.OnInitializedAsync();
+        await _vm.GetUserGoals();
+        ConfigureDonutChart();
+    }
+
+    private void ConfigureDonutChart()
+    {
+        _config.Data.Labels.Add("Completed");
+        _config.Data.Labels.Add("Pending");
+        var allPoints = _vm.AllGoals.Sum(o => o.Difficulty);
+        var completedPoints = _vm.AllGoals.Where(o => o.IsCompleted).Sum(o => o.Difficulty);
+        PieDataset<int> data = new PieDataset<int>(new int[] { completedPoints, allPoints - completedPoints })
+        {
+            BackgroundColor = new[]
+            {
+                ColorUtil.ColorHexString(0, 255, 0), // Slice 1 aka "Red"
+                ColorUtil.ColorHexString(164, 164, 164), // Slice 2 aka "Yellow"        
+            },
+        };
+
+        _config.Data.Datasets.Add(data);
+    }
+}

@@ -1,0 +1,43 @@
+﻿@using BC.Client.Data
+@inject NavigationManager navigation
+
+<ul class="list-unstyled components mb-5">
+    @foreach (var item in Items)
+    {
+        <li class="@item.ListItemClass">
+            <a href="@item.Route"><span class="fa @item.Icon mr-3"></span>@item.Name</a>
+        </li>
+    }
+</ul>
+
+@code { 
+
+    [Parameter]
+    public List<NavMenuItem> Items { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        navigation.LocationChanged += NavigationLocationChanged;
+        if (Items == null)
+            Items = new List<NavMenuItem>()
+            {
+                new NavMenuItem("Home", "fa-home", "/") { IsActive = true }
+            };
+    }
+
+    private void NavigationLocationChanged(object sender, LocationChangedEventArgs args)
+    {
+        NavMenuItem current = null;
+        var path = new Uri(navigation.Uri).AbsolutePath;
+        foreach (var item in Items)
+        {
+            if (path == item.Route)
+                current = item;
+            item.IsActive = false;
+        }
+        if (current == null)
+            return;
+        current.IsActive = true;
+    }
+}

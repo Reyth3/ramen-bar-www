@@ -1,0 +1,54 @@
+﻿@using BC.Client.Data
+@using System.Security.Claims
+@inherits LayoutComponentBase
+
+    <div class="wrapper d-flex align-items-stretch">
+        <nav id="sidebar">
+            <div class="custom-menu">
+                <button onclick="toggleSidebar()" type="button" id="sidebarCollapse" class="btn btn-primary">
+                    <i class="fa fa-bars"></i>
+                    <span class="sr-only">Toggle Menu</span>
+                </button>
+            </div>
+            <h1><a href="/" class="logo">2021 Goals</a></h1>
+            <NavMenu Items="navigationItems" />
+
+        </nav>
+
+        <!-- Page Content  -->
+        <div id="content" class="p-4 p-md-5 pt-5">
+            <nav class="navbar navbar-light bg-light align-content-end ">
+                <AuthorizeView>
+                    <Authorized>
+                        <h3 class="text-right">Hello, @LoggedInEmail!</h3>
+                        <button class="btn btn-primary my-2 my-sm-0" type="submit">Log Out</button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <button class="btn btn-primary my-2 my-sm-0" type="submit">Log In</button>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </nav>
+            @Body
+        </div>
+    </div>
+
+@code {
+    private List<NavMenuItem> navigationItems = new List<NavMenuItem>()
+    {
+        new NavMenuItem("Home", "fa-home", "/"),
+        new NavMenuItem("Manage", "fa-key", "/login"),
+    };
+
+    private string LoggedInEmail { get; set; } = "";
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var auth = await AuthState;
+        if (auth.User.Identity.IsAuthenticated)
+            LoggedInEmail = auth.User.FindFirst(ClaimTypes.Name).Value;
+    }
+}
