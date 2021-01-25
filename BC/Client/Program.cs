@@ -24,9 +24,14 @@ namespace BC.Client
 
             var httpClientConfig = new Action<HttpClient>((http) => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-            builder.Services.AddHttpClient<GoalsDashboardVM>(httpClientConfig);
+            builder.Services.AddHttpClient<MenuLoaderService>(httpClientConfig);
+            builder.Services.AddHttpClient<AnnouncementLoaderService>(httpClientConfig);
+            builder.Services.AddHttpClient<ReservationLoaderService>(httpClientConfig);
             builder.Services.AddHttpClient<UserProfileVM>(httpClientConfig);
+            builder.Services.AddHttpClient<ReservationVM>(httpClientConfig);
             builder.Services.AddHttpClient<LogInVM>(httpClientConfig);
+            builder.Services.AddHttpClient<RegisterVM>(httpClientConfig);
+            builder.Services.AddTransient<AnnouncementVM>();
 
             await builder.Build().RunAsync();
         }

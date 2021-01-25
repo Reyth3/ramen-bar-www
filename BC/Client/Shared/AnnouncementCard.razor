@@ -1,0 +1,18 @@
+﻿@using BC.Shared
+
+@if (Item != null)
+{
+<div class="card" style="width: 18rem;">
+    <img class="card-img-top" src="" alt="Card image cap">
+    <div class="card-body">
+        <h5 class="card-title">@Item.Title</h5>
+        <p class="card-text">@(Item.Preview)...</p>
+        <a href="news/@Item.AnnouncementId" class="btn btn-primary">Czytaj więcej</a>
+    </div>
+</div>
+}
+
+@code {
+    [Parameter]
+    public AnnouncementVM Item { get; set; }
+}

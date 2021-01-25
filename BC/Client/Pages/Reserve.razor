@@ -1,0 +1,76 @@
+﻿@page "/reserve"
+@using BC.Shared
+@inject ReservationLoaderService rls
+@inject ReservationVM vm
+@inject NavigationManager navigation
+
+<section class="container">
+    <h3>Rezerwacje</h3>
+
+    <AuthorizeView>
+        <NotAuthorized>
+            <h5>Brak dostępu</h5>
+            <p>Aby zarządzać swoimi rezerwacjami musisz się najpierw zalogować.</p>
+            <a href="/login">Zaloguj się / załóż konto &rarr;</a>
+        </NotAuthorized>
+        <Authorized>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Nadchodzące rezerwacje</h5>
+                    <ReservationsView Reservations="upcoming" />
+                </div>
+                <div class="col-md-6">
+                    <h5>Wcześniejsze rezerwacje</h5>
+                    <ReservationsView Reservations="archived" />
+                </div>
+            </div>
+            <hr />
+            <h5>Nowa rezerwacja</h5>
+            <EditForm Model="vm" OnValidSubmit="@SubmitReservation" Context="formContext">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <InputDateTime @bind-Value="vm.ReservationTime"  />
+                <InputNumber @bind-Value="vm.GuestsNumber" />
+                <button type="submit">Nowa rezerwacja</button>
+            </EditForm>
+        </Authorized>
+    </AuthorizeView>
+
+</section>
+
+@code {
+    private List<ReservationVM> archived;
+    private List<ReservationVM> upcoming;
+
+    private async Task RefreshReservations(ReservationVM[] cache = null)
+    {
+        if (archived == null)
+            archived = new List<ReservationVM>();
+        else archived.Clear();
+        if (upcoming == null)
+            upcoming = new List<ReservationVM>();
+        else upcoming.Clear();
+        ReservationVM[] reservations = null;
+        if (cache != null)
+            reservations = cache;
+        else reservations = await rls.GetAllReservationsAsync(); ;
+        foreach (var res in reservations)
+            if (res.Archived)
+                archived.Add(res);
+            else upcoming.Add(res);
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await RefreshReservations();
+    }
+
+    public async void SubmitReservation()
+    {
+        var cache = await vm.PostReservation();
+        await RefreshReservations(cache);
+        navigation.NavigateTo(navigation.Uri, true);
+    }
+}

@@ -1,86 +1,62 @@
 ﻿@page "/"
 
 @using BC.Shared
-@using ChartJs.Blazor.PieChart
-@using ChartJs.Blazor.Common
-@using ChartJs.Blazor.Util
 @using BC.Client.Shared
-@inject GoalsDashboardVM _vm
+@using System.Text
+@inject AnnouncementLoaderService als
 
-<AuthorizeView>
-    <Authorized>
-        <div class="container-fluid">
-            <h1>My Goals!</h1>
-            <div class="row">
-                <div class="col-md-8">
+<section class="container bg-transparent text-light text-center align-middle" style="margin-top: 15rem; margin-bottom:10rem; background-color: rgba(0, 0, 0, 0.2)">
+    <h2>Najlepszy ramen w mieście!</h2>
+    <h3>Wszystkie Twoje ulubione rodzaje ramen tylko u nas! Wszystkie wywary przygotowujemy korzystając z najwyższej jakości składników importowanych bezpośrednio z Japonii. Sprawdź naszą ofertę już teraz!</h3>
+    <a href="/menu" class="btn btn-block btn-outline-secondary mt-5">Nasze Menu</a>
+</section>
 
-                    @if (_vm.Goals == null)
+<section id="about" class="">
+    <div class="text-content container">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Ogłoszenia</h1>
+                @if (Announcements != null)
+                {
+                    @foreach (var a in Announcements)
                     {
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="sr-only">Loading...</span>
+                        <div class="card">
+                            <img class="card-img-top" src="@a.ImageSource" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">@a.Title</h5>
+                                <h6>@a.PostingDate.ToLocalTime().ToString("dddd, dd MMM yyyy HH:mm") | Dodał(a): @a.AuthorFirstName @a.AuthorLastName</h6>
+                                <p class="card-text">@(a.Preview)...</p>
+                                <a href="news/@a.AnnouncementId" class="btn btn-primary">Czytaj więcej</a>
+                            </div>
                         </div>
                     }
-                    else
-                    {
-
-                        <ul>
-                            <GoalsView Items="_vm.Goals" />
-                        </ul>
-                    }
-                </div>
-                <div class="col-md-4">
-                    <Chart Config="_config"></Chart>
-                </div>
+                }
+                else
+                {
+                    <p>Wczytywanie ogłoszeń...</p>
+                }
+            </div>
+        <div class="col-md-6">
+            <h1>About us</h1>
+            <div class="fa fa-cutlery fa-2x"></div>
+            <p class="desc-text">Otworzyliśmy nasz ramen bar w 2019 roku i od tego czasu serwujemy najlepszy ramen w całym Jarosławiu.</p>
+            <p>Sint blanditiis sed autem magnam et pariatur est natus. Autem ratione est molestiae. Aliquam voluptatem aut recusandae. Beatae est illum aut mollitia exercitationem enim voluptas.</p>
+            <p>
+                Similique quas at iusto repellendus cupiditate sunt. Dolor repudiandae aliquam officia accusantium est est nihil quis. Sit quia reprehenderit ut. Dolores delectus ut consequatur eum laboriosam. Nihil magni ab voluptas possimus velit ea.
+            </p>
+        </div>
             </div>
         </div>
+</section>
 
-    </Authorized>
-    <NotAuthorized>
-        <h2>Not authorized.</h2>
-    </NotAuthorized>
-</AuthorizeView>
+@code {
 
-
-@code { 
-
-    private PieConfig _config;
+    public AnnouncementVM[] Announcements { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
-
-        _config = new PieConfig(true)
-        {
-            Options = new PieOptions()
-            {
-                Responsive = true,
-                Title = new ChartJs.Blazor.Common.OptionsTitle()
-                {
-                    Display = true,
-                    Text = "Goal Completion",
-                },
-            },
-        };
         await base.OnInitializedAsync();
-        await _vm.GetUserGoals();
-        ConfigureDonutChart();
-    }
-
-    private void ConfigureDonutChart()
-    {
-        _config.Data.Labels.Add("Completed");
-        _config.Data.Labels.Add("Pending");
-        var allPoints = _vm.AllGoals.Sum(o => o.Difficulty);
-        var completedPoints = _vm.AllGoals.Where(o => o.IsCompleted).Sum(o => o.Difficulty);
-        PieDataset<int> data = new PieDataset<int>(new int[] { completedPoints, allPoints - completedPoints })
-        {
-            BackgroundColor = new[]
-            {
-                ColorUtil.ColorHexString(0, 255, 0), // Slice 1 aka "Red"
-                ColorUtil.ColorHexString(164, 164, 164), // Slice 2 aka "Yellow"        
-            },
-        };
-
-        _config.Data.Datasets.Add(data);
+        Announcements = await als.GetRecentAnnouncementsAsync(5);
     }
 }

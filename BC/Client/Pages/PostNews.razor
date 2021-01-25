@@ -1,0 +1,75 @@
+﻿@page "/news/post"
+@using BC.Shared
+@using System.Text
+@inject AnnouncementVM vm    
+@inject AnnouncementLoaderService als
+    <section class="container">
+        <h3>Dodaj Ogłoszenie</h3>
+        <AuthorizeView>
+            <NotAuthorized>
+                <h5>Brak dostępu</h5>
+                <p>Aby dodawać ogłoszenia musisz się najpierw zalogować jako administrator.</p>
+                <a href="/login">Zaloguj się / załóż konto &rarr;</a>
+            </NotAuthorized>
+            <Authorized>
+                @if(alertMessage != null)
+                {
+                    <div class="alert alert-@alertType">
+                        @alertMessage
+                    </div>
+                }
+                <EditForm Model="vm" Context="postAnnouncementForm" OnValidSubmit="@SubmitAnnouncement">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <p>Tytuł: <InputText @bind-Value="vm.Title" /></p>
+                    <p>Miniaturka: <InputFile OnChange="@OnInputFileChange" />
+                        @if (loadedImage != null)
+                        {
+                            <img src="@loadedImage" alt="preview" />
+                        }
+                    </p>
+                    <p>Treść: <InputTextArea @bind-Value="vm.Text" /></p>
+                    <p><button type="submit">Opublikuj</button></p>
+                </EditForm>
+            </Authorized>
+        </AuthorizeView>
+
+    </section>
+
+    @code {
+
+        private string alertType;
+        private string alertMessage;
+
+        private string loadedImage;
+
+        private async Task OnInputFileChange(InputFileChangeEventArgs e)
+        {
+            var format = "image/png";
+
+            var imgFile = await e.File.RequestImageFileAsync(format, 200, 200);
+
+            var buffer = new byte[imgFile.Size];
+            await imgFile.OpenReadStream().ReadAsync(buffer);
+            var imageDataUrl =
+                $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+            loadedImage = imageDataUrl;
+        }
+
+        private async void SubmitAnnouncement()
+        {
+            var thumbnail = Encoding.UTF8.GetBytes(loadedImage);
+            vm.Thumbnail = thumbnail;
+            if(await als.PostNewAnnouncement(vm))
+            {
+                alertMessage = "Ogłoszenie zostało dodane.";
+                alertType = "success";
+            }
+            else
+            {
+                alertMessage = "Wystąpił błąd i ogłoszenie nie zostało dodane.";
+                alertType = "danger";
+            }
+        }
+    }

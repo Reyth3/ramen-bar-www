@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,7 +29,27 @@ namespace BC.Shared
 
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string AvatarUrl { get; set; }
+        public bool IsEditor { get; set; }
+        public int PostedAnnouncementsCount { get; set; }
+        public int ReservationsCount { get; set; }
+
+        public async Task GetCurrentlyLoggedInUser()
+        {
+            var user = await _http.GetFromJsonAsync<UserProfileVM>("/user/current");
+            if (user == null)
+                return;
+            EmailAddress = user.EmailAddress;
+            FirstName = user.FirstName;
+            LastName = user.LastName;
+            IsEditor = user.IsEditor;
+            PostedAnnouncementsCount = user.PostedAnnouncementsCount;
+            ReservationsCount = user.ReservationsCount;
+        }
+
+        public async Task LogOutCurrentUser()
+        {
+            var user = await _http.GetFromJsonAsync<object>("/user/logout");
+        }
 
         #region Implicit operators
         public static implicit operator UserProfileVM(UserProfile up)
@@ -37,7 +58,9 @@ namespace BC.Shared
                 return null;
             else return new UserProfileVM()
             {
-                AvatarUrl = up.AvatarUrl,
+                PostedAnnouncementsCount = up.PostedAnnouncements.Count,
+                ReservationsCount = up.Reservations.Count,
+                IsEditor = up.IsEditor,
                 EmailAddress = up.EmailAddress,
                 FirstName = up.FirstName,
                 LastName = up.LastName,
@@ -48,7 +71,6 @@ namespace BC.Shared
         public static implicit operator UserProfile(UserProfileVM vm) => new UserProfile()
         {
             FirstName = vm.FirstName,
-            AvatarUrl = vm.AvatarUrl,
             EmailAddress = vm.EmailAddress,
             LastName = vm.LastName,
             UserProfileId = vm.UserProfileId

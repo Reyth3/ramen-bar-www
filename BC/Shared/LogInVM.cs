@@ -24,7 +24,7 @@ namespace BC.Shared
 
         public async Task<bool> SignInUserAsync()
         {
-            if(string.IsNullOrEmpty(Email) || !Email.Contains("@") || Password.Length < 4 || string.IsNullOrEmpty(Password))
+            if(string.IsNullOrEmpty(Email) || Password.Length < 4 || string.IsNullOrEmpty(Password))
             {
                 UIMessage = "Provided email and password is incorrect.";
                 return false;

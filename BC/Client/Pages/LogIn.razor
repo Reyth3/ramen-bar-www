@@ -2,6 +2,9 @@
 @using BC.Shared
 @inject LogInVM _vm
 @inject NavigationManager _navigation
+@inject RegisterVM _rVm
+
+<section class="container">
 
 <h3>Log In</h3>
 
@@ -11,24 +14,57 @@
         @_vm.UIMessage
     </div>
 }
+<div class="row">
+<div class="col-lg-6">
+    <h4>Zaloguj się</h4>
 <form>
     <div class="form-group">
         <label for="exampleInputEmail1">Email address</label>
-        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" @bind-value="_vm.Email">
-        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Email" @bind-value="_vm.Email">
     </div>
     <div class="form-group">
         <label for="exampleInputPassword1">Password</label>
-        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" @bind-value="_vm.Password">
+        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Hasło" @bind-value="_vm.Password">
     </div>
-    <input type="button" @onclick="LogInButtonClick" class="btn btn-primary" value="Log In" />
+    <input type="button" @onclick="LogInButtonClick" class="btn btn-primary" value="Zaloguj się" />
 </form>
+</div>
+<div class="col-lg-6">
+    <h4>Utwórz konto</h4>
+    <form>
+        <div class="form-group">
+            <label for="registerEmail">Adres email</label>
+            <input type="email" class="form-control" id="registerEmail" aria-describedby="emailHelp" placeholder="Email" @bind-value="_rVm.Email">
+        </div>
+        <div class="form-group">
+            <label for="registerPassword">Hasło</label>
+            <input type="password" class="form-control" id="registerPassword" placeholder="Hasło" @bind-value="_rVm.Password">
+        </div>
+        <div class="form-group">
+            <label for="registerFN">Imię</label>
+            <input type="text" class="form-control" id="registerFN" placeholder="Imię" @bind-value="_rVm.FirstName">
+        </div>
+        <div class="form-group">
+            <label for="registerLN">Nazwisko</label>
+            <input type="text" class="form-control" id="registerLN" placeholder="Nazwisko" @bind-value="_rVm.LastName">
+        </div>
+        <input type="button" @onclick="RegisterButtonClick" class="btn btn-primary" value="Załóż konto" />
+    </form>
+</div>
+</div>
+</section>
 
 @code {
 
     private async void LogInButtonClick()
     {
         if (await _vm.SignInUserAsync())
+            _navigation.NavigateTo("/", true);
+    }
+
+    private async void RegisterButtonClick()
+    {
+        if (await _rVm.RegisterNewUser())
             _navigation.NavigateTo("/", true);
     }
 }

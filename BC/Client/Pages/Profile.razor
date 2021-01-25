@@ -1,0 +1,68 @@
+﻿@page "/profile"
+
+@using BC.Shared
+@inject UserProfileVM vm
+@inject NavigationManager navigation
+
+<section class="container">
+    <h3>Mój Profil</h3>
+    <div class="row">
+        <div class="col-md-8">
+            <h6>Twoje dane</h6>
+            <table class="table">
+                <tr>
+                    <td>Email</td>
+                    <td>@vm.EmailAddress</td>
+                </tr>
+                <tr>
+                    <td>Imię</td>
+                    <td>@vm.FirstName</td>
+                </tr>
+                <tr>
+                    <td>Nazwisko</td>
+                    <td>@vm.LastName</td>
+                </tr>
+                <tr>
+                    <td>Rola</td>
+                    <td>@(vm.IsEditor ? "Administrator" : "Klient")</td>
+                </tr>
+                <tr>
+                    <td>Liczba rezerwacji</td>
+                    <td>@vm.ReservationsCount</td>
+                </tr>
+                @if(vm.IsEditor)
+                {
+                    <tr>
+                        <td>Opublikowane ogłoszenia</td>
+                        <td>@vm.PostedAnnouncementsCount</td>
+                    </tr>
+                }
+            </table>
+        </div>
+        <div class="col-md-4">
+            <h6>Zarządzaj kontem</h6>
+            @if (vm.IsEditor)
+            {
+                <a href="/news/post" class="btn btn-block btn-light">Dodaj ogłoszenie</a>
+            }
+        <a href="/reserve" class="btn btn-block btn-light">Nowa rezerwacja</a>
+            <button class="btn btn-block btn-light" @onclick="LogOutClicked">Wyloguj się</button>
+        </div>
+    </div>
+
+</section>
+@code { 
+
+
+    override protected async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await vm.GetCurrentlyLoggedInUser();
+    }
+
+    private async void LogOutClicked()
+    {
+        await vm.LogOutCurrentUser();
+        navigation.NavigateTo("/", true);
+    }
+}

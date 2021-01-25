@@ -1,0 +1,38 @@
+﻿@page "/menu"
+@using BC.Shared
+
+@inject MenuLoaderService mls
+<section>
+<div class="container">
+<h3>Menu</h3>
+
+@if(MenuItems == null)
+{
+    <h3>Wczytywanie menu...</h3>
+}
+else
+{
+    <ul class="list-group">
+    @foreach(var item in MenuItems)
+    {
+        <li class="list-group-item-light">
+            <h3>@item.ItemName</h3>
+            <h6>@item.Price.ToString("0.00")zł</h6>
+            <p>@item.Description</p>
+        </li>
+    }
+    </ul>
+}
+
+</div>
+</section>
+
+@code {
+    public MenuItemVM[] MenuItems { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        MenuItems = await mls.GetAllMenuItemsAsync();
+    }
+}

@@ -1,0 +1,29 @@
+﻿@using BC.Shared
+    <table class="table">
+        <tr>
+            <th>Data rezerwacji</th>
+            <th>Ilość osób</th>
+        </tr>
+        @if (Reservations != null)
+        {
+            @foreach (var item in Reservations)
+            {
+                <tr>
+                    <td>@item.ReservationTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@item.GuestsNumber</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">Wczytywanie rezerwacji...</td>
+            </tr>
+        }
+    </table>
+
+@code {
+
+    [Parameter]
+    public List<ReservationVM> Reservations { get; set; }
+}

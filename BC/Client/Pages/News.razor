@@ -1,0 +1,34 @@
+﻿@page "/news/{Id:int}"
+@using BC.Shared
+@inject AnnouncementLoaderService als
+<section>
+    <div class="container">
+
+@if(Announcement == null)
+{
+    <p>Wczytywanie...</p>
+}
+else
+{
+    <img src="@Announcement.ImageSource" alt="Miniaturka" class="float-md-left img-thumbnail" />
+    <h3 class="float-md-none">
+        @Announcement.Title
+    </h3>
+    @((MarkupString)Announcement.Text)
+}
+        <a class="btn btn-primary btn-block" href="/">&larr; Wróć</a>
+    </div>
+</section>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public AnnouncementVM Announcement { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Announcement = await als.GetAnnouncementById(Id);
+    }
+}

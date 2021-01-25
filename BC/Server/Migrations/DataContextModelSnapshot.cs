@@ -19,49 +19,92 @@ namespace BC.Server.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.1");
 
-            modelBuilder.Entity("BC.Shared.Models.Goal", b =>
+            modelBuilder.Entity("BC.Shared.Models.Announcement", b =>
                 {
-                    b.Property<int>("GoalId")
+                    b.Property<int>("AnnouncementId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<DateTime>("DateCompleted")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Difficulty")
+                    b.Property<int?>("AuthorUserProfileId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ExpectedDeadline")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("PostingDate")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
+                    b.Property<string>("Preview")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("OwnerId")
+                    b.Property<string>("Text")
+                        .HasMaxLength(5000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Thumbnail")
+                        .HasMaxLength(1048576)
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("AnnouncementId");
+
+                    b.HasIndex("AuthorUserProfileId");
+
+                    b.HasIndex("PostingDate");
+
+                    b.ToTable("Announcements");
+                });
+
+            modelBuilder.Entity("BC.Shared.Models.MenuItem", b =>
+                {
+                    b.Property<int>("MenuItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ItemName")
+                        .HasMaxLength(96)
+                        .HasColumnType("nvarchar(96)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.HasKey("MenuItemId");
+
+                    b.ToTable("MenuItems");
+                });
+
+            modelBuilder.Entity("BC.Shared.Models.Reservation", b =>
+                {
+                    b.Property<int>("ReservationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("GuestsNumber")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ParentGoalId")
+                    b.Property<int?>("OwnerUserProfileId")
                         .HasColumnType("int");
 
-                    b.HasKey("GoalId");
+                    b.Property<DateTimeOffset>("ReservationTime")
+                        .HasColumnType("datetimeoffset");
 
-                    b.HasIndex("Difficulty");
+                    b.HasKey("ReservationId");
 
-                    b.HasIndex("ExpectedDeadline");
+                    b.HasIndex("GuestsNumber");
 
-                    b.HasIndex("IsCompleted");
+                    b.HasIndex("OwnerUserProfileId");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("ReservationTime");
 
-                    b.HasIndex("ParentGoalId");
-
-                    b.ToTable("Goals");
+                    b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("BC.Shared.Models.UserProfile", b =>
@@ -70,10 +113,6 @@ namespace BC.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .UseIdentityColumn();
-
-                    b.Property<string>("AvatarUrl")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("EmailAddress")
                         .IsRequired()
@@ -84,6 +123,10 @@ namespace BC.Server.Migrations
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
+
+                    b.Property<bool>("IsEditor")
+                        .HasMaxLength(128)
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -103,26 +146,29 @@ namespace BC.Server.Migrations
                     b.ToTable("UserProfiles");
                 });
 
-            modelBuilder.Entity("BC.Shared.Models.Goal", b =>
+            modelBuilder.Entity("BC.Shared.Models.Announcement", b =>
+                {
+                    b.HasOne("BC.Shared.Models.UserProfile", "Author")
+                        .WithMany("PostedAnnouncements")
+                        .HasForeignKey("AuthorUserProfileId");
+
+                    b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("BC.Shared.Models.Reservation", b =>
                 {
                     b.HasOne("BC.Shared.Models.UserProfile", "Owner")
-                        .WithMany("Goals")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BC.Shared.Models.Goal", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentGoalId");
+                        .WithMany("Reservations")
+                        .HasForeignKey("OwnerUserProfileId");
 
                     b.Navigation("Owner");
-
-                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("BC.Shared.Models.UserProfile", b =>
                 {
-                    b.Navigation("Goals");
+                    b.Navigation("PostedAnnouncements");
+
+                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

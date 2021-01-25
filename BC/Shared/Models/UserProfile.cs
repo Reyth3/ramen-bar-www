@@ -11,7 +11,8 @@ namespace BC.Shared.Models
     {
         public UserProfile()
         {
-            Goals = new List<Goal>();
+            Reservations = new List<Reservation>();
+            PostedAnnouncements = new List<Announcement>();
         }
 
         public int UserProfileId { get; set; }
@@ -25,8 +26,9 @@ namespace BC.Shared.Models
         [Required, MaxLength(32)]
         public string LastName { get; set; }
         [MaxLength(128)]
-        public string AvatarUrl { get; set; }
+        public bool IsEditor { get; set; }
 
-        public virtual List<Goal> Goals { get; set; }
+        public List<Announcement> PostedAnnouncements { get; set; }
+        public List<Reservation> Reservations { get; set; }
     }
 }
